@@ -14,25 +14,39 @@ sudo docker pull openroad/ubuntu20.04-dev
 > or ``` sudo docker images ```
 
 To start using docker's openroad image you can type :
-- First start the docker service (docker daemon) 
+- First start the docker service (docker daemon)
+- Then create + run and new container name "my_openroad" along with our project mounted.
 ```
 sudo service docker start
-sudo docker run -it openroad/ubuntu20.04-dev
+# First time only
+sudo docker run -dt --name my_openroad -v $(pwd):/project openroad/ubuntu20.04-dev
 ```
-> Type ```sudo service docker status``` to check the status of docker (running or stopped)
-> Type ```exit``` to exit from docker environment.
-> Type ```sudo docker stop ``` to stop the running container.
-> Type ``` sudo service docker stop``` to stop the full docker service.
-
-Now to mount the current macro placement project directory and run docker :
+Open a pre-made container (example container name 'my_openroad') : 
 ```
-sudo docker run -dt -v $(pwd):/project openroad/ubuntu20.04-dev
+# 1. Start the existing container
+sudo docker ps -as
+sudo docker start my_openroad
+
+# 2. "Step into" the already running container
+sudo docker exec -it my_openroad bash
 ```
+*! MOST PROBABLY YOU ARE INSIDE the Openraod Docker environment !*
+>- Type ```exit``` to exit from docker environment.
+>- Type ```sudo docker ps -as``` to check all container details.
+>- Type ```sudo service docker status``` to check the status of docker (running or stopped).
+>- Type ```sudo docker stop my_openroad ``` to stop the running container.
+>- Type ```sudo service docker stop``` to stop the full docker service.
 
-
-
+### Docker container in VS Code
 - Steps to use docker environment in VS Code :
 
   Now, Open VS code and install the "dev container" extension
-- Go to terminal and start the container : 
-
+- Go to terminal and start the container using above mentioned steps. (No need to use 'exec' command)
+- Click on ```><``` on the bottom left or Open Command Pallet using ```>``` in search bar.
+- Then search for ```Dev Container : Attach running container``` (This will only work if you have started the container, else error)
+- Attach the __my_openroad__ container (you should see project directory, which contains the Local mounted directory)
+<img width="533" height="51" alt="image" src="https://github.com/user-attachments/assets/95f1b2d9-bf66-41b3-99e4-0eccc4c80510" />
+- Now , go to search bar and type ```/``` to move through directories.
+- Hence,Go to project directory now : /project. So ```cd/ prediuous```
+### Git Clone Openroad :
+- From the docker or simple wsl, do git clone 
