@@ -53,7 +53,7 @@ Steps to use docker environment in VS Code. Now, Open VS code and install the "d
 <img width="533" height="51" alt="image" src="https://github.com/user-attachments/assets/95f1b2d9-bf66-41b3-99e4-0eccc4c80510" />
 
 - Now , go to search bar and type ```/``` to move through directories.
-- Here,go to project directory now : /project. So ```cd/ prediuous```
+- Here,go to project directory now : /project.
 
   ***
   
@@ -134,25 +134,97 @@ ls -l
 ```
 Expected output : something like :```lrwxrwxrwx 1 1000 1000    17 Mar 21 03:41 adaptec1 -> /project/adaptec1```
 
-### Modify the convert_bookshelf2odb.py 
-To convert bookshelf to odb we have to use 'convert_bookshelf2odb.py'.Open and scroll down to the very bottom of the file. RosettaStone uses a "Settings" block to determine which folders to process and what technology to map them to.
+***
 
-Open the file in your VS Code editor and modify the last few lines to look exactly like this:
+### Execution 
+The file ```BookshelfToOdb.py``` inside ```/project/RosettaStone/benchGen/``` will actually convert the Bookshelf format to Odb format.
+There is a driver file name ```run_baseline.py``` which runs the ```BookshelfToOdb.py``` file.
+> NOTE : Remove ```odbpy``` from ```BookshelfToOdb.py``` or wherever you see (like import odbpy as odb) because the newer versions don't have anything like odbpy. Just simply ```import odb```
+>```
+>"/project/RosettaStone/benchGen/run_BookshelfToOdb.py", line 1, in <module>
+>   import odbpy as odb
+>   ModuleNotFoundError: No module named 'odbpy'
+>```
+
+###To Run :
 ```
-################ Settings #################
-# This is where your converted .odb file will be saved
-odbPath = '../../odbFiles' 
-
-# We will use '0' padding to keep the macro sizes exactly as they are in your .nodes file
-cellPaddings = [0] 
-
-# The ISPD 2005 benchmarks (like adaptec1) follow this format
-modeFormats = ['ISPD05'] 
-
-# IMPORTANT: This must match the name of your symlink/folder
-odbList = [
-    'adaptec1', 
-]
-###########################################
+ openroad -python /project/RosettaStone/benchGen/run_BookshelfToOdb.py
 ```
+
+#### Error 1:
+```
+"/project/RosettaStone/benchGen/BookshelfToOdb.py", line 268, in ParseAux
+    self.ParseNodes(nodeName)
+  File "/project/RosettaStone/benchGen/BookshelfToOdb.py", line 285, in ParseNodes
+    f = open(nodeName, 'r')
+FileNotFoundError: [Errno 2] No such file or directory: 'adaptec1.nodes'
+```
+#### Solution : 
+Already added chdir() code in driver program
+```
+# 2. Teleport the script's execution into your benchmark folder
+os.chdir('/project/adaptec1')
+```
+Error 2: Lef file error 
+Means your Bookshelf files were successfully located and parsed. Your benchmark is officially loaded into memory. The crash you hit next (TypeError: ... dbChip_create) is a classic OpenROAD API version mismatch.In older versions of OpenROAD, you could create a blank "Chip" without defining the physical technology rules first. In OpenROAD 26Q1, the dbChip_create command now strictly requires two arguments: the database and a Technology object (dbTech).
+
+```
+Bookshelf Parsing Done
+Traceback (most recent call last):
+  File "/project/RosettaStone/benchGen/run_BookshelfToOdb.py", line 17, in <module>
+    converter = b2o.BookshelfToOdb(
+  File "/project/RosettaStone/benchGen/BookshelfToOdb.py", line 211, in __init__
+    self.InitOdb(
+  File "/project/RosettaStone/benchGen/BookshelfToOdb.py", line 965, in InitOdb
+    chip = self.odbpy.dbChip_create(self.odb)
+  File "odb_py.py", line 6345, in dbChip_create
+TypeError: Wrong number or type of arguments for overloaded function 'dbChip_create'.
+```
+#### Solution : 
+#### 1st argument correction
+**Direct replacing :** 
+Adding the another arg using sed editor using below code from terminal.
+```
+sed -i 's/chip = self.odbpy.dbChip_create(self.odb)/chip = self.odbpy.dbChip_create(self.odb, self.odb.getTech())/g' /project/RosettaStone/benchGen/BookshelfToOdb.py
+```
+**Manual Correction :**
+1. Open /project/RosettaStone/benchGen/BookshelfToOdb.py in VS Code.
+2. Go to line 965 or nearby where you will see
+   ```chip = self.odbpy.dbChip_create(self.odb)```
+3. Replace it with : ```chip = self.odbpy.dbChip_create(self.odb, self.odb.getTech())```
+4. Save it.
+
+#### 2nd argument correction : 
+Here we will add the lef file to RosettaStone.
+```
+# 1. Create a dedicated folder for your technology files
+mkdir -p /project/tech
+
+# 2. Download the official Nangate45 LEF from the OpenROAD repository
+wget -O /project/tech/Nangate45.lef https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD/master/test/Nangate45/Nangate45.lef
+```
+Also the path in driver file have been updated and hardcoded here : ```tech_lef = '/project/tech/Nangate45.lef'```
+Error 3: Overwrite Database Units problem in RosettaStone : 
+
+```
+Bookshelf Parsing Done
+Traceback (most recent call last):
+  File "/project/RosettaStone/benchGen/run_BookshelfToOdb.py", line 25, in <module>
+    converter = b2o.BookshelfToOdb(
+  File "/project/RosettaStone/benchGen/BookshelfToOdb.py", line 211, in __init__
+    self.InitOdb(
+  File "/project/RosettaStone/benchGen/BookshelfToOdb.py", line 980, in InitOdb
+    odbTech.setDbUnitsPerMicron(originalLEFDbu)
+AttributeError: 'dbTech' object has no attribute 'setDbUnitsPerMicron'. Did you mean: 'getDbUnitsPerMicron'?
+```
+On lines ```979``` and ```980``` of BookshelfToOdb.py:
+It reads the current Database Units (DBU) from the Nangate45 LEF: originalLEFDbu = ```odbTech.getDbUnitsPerMicron()```
+It immediately tries to overwrite the DBU with that exact same number: ```odbTech.setDbUnitsPerMicron(originalLEFDbu)```
+In older versions of OpenROAD, this redundant action was harmless. In OpenROAD 26Q1, the developers wisely made the Technology DBU "read-only" once a LEF is loaded. You can't change the fundamental rules of the universe after it's created. 
+
+- So **comment** out this at line980 or nearby. 
+```
+odbTech.setDbUnitsPerMicron(originalLEFDbu)
+````
+Try to run again (Mentioned earlier)
 
