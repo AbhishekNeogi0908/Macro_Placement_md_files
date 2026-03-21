@@ -1,7 +1,8 @@
 # Macro Placement User Manual
 
-## Openroad Downlaod
+## 1. Openroad Downlaod
 1. Docker Download
+   
 We will downlad and use openroad using wsl. So Here are the steps to download Openroad in wsl and then run it in VS Code.
 ```
 sudo apt udpate
@@ -68,13 +69,13 @@ https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#
   git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
   cd OpenROAD
   ```
-- Probable error:
+- Error :
   ```
   git config --global --add safe.directory /project/OpenROAD/third-party/abc
   fatal: Failed to recurse into submodule path 'src/sta'
   fatal: Failed to recurse into submodule path 'third-party/abc'
   ```
-  Reason: This "Dubious Ownership" error is a common security feature in newer versions of Git. Since you are working as root inside a Docker container, but the files are being written to a "mounted" directory (your Windows/WSL drive), Git gets suspicious because the file owner on the "outside" doesn't match the user on the "inside."
+  Reason: This "Dubious Ownership" error is a common security feature in newer versions of Git. Since we are working as root inside a Docker container, but the files are being written to a "mounted" directory (your Windows/WSL drive), Git gets suspicious because the file owner on the "outside" doesn't match the user on the "inside."
   Solution 
   ```
   git config --global --add safe.directory "*"
@@ -96,7 +97,7 @@ https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#
 OpenRoad successfully Installed !!!
 
 ***
-## Installing RosettaStone
+## 2. Installing RosettaStone
 Since you are already inside your Docker container and positioned in the ```/project``` directory, you can download RosettaStone using git.
 ```
 # 1. Ensure you are in your mounted project folder
@@ -135,8 +136,7 @@ ls -l
 Expected output : something like :```lrwxrwxrwx 1 1000 1000    17 Mar 21 03:41 adaptec1 -> /project/adaptec1```
 
 ***
-
-### Execution 
+## 3. Execution 
 The file ```BookshelfToOdb.py``` inside ```/project/RosettaStone/benchGen/``` will actually convert the Bookshelf format to Odb format.
 There is a driver file name ```run_baseline.py``` which runs the ```BookshelfToOdb.py``` file.
 > NOTE : Remove ```odbpy``` from ```BookshelfToOdb.py``` or wherever you see (like import odbpy as odb) because the newer versions don't have anything like odbpy. Just simply ```import odb```
