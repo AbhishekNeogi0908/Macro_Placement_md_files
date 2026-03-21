@@ -22,7 +22,7 @@ sudo service docker start
 sudo docker run -dt --name my_openroad -v "${PWD}:/project" openroad/ubuntu20.04-dev
 ```
 Open a pre-made container (example container name 'my_openroad') : 
-
+```
 # 1. Start the existing container
 sudo docker ps -as
 sudo docker start my_openroad
