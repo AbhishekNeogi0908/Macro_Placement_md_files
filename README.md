@@ -1,6 +1,7 @@
 # Macro Placement User Manual
 
-### Openroad Downlaod
+## Openroad Downlaod
+1. Docker Download
 We will downlad and use openroad using wsl. So Here are the steps to download Openroad in wsl and then run it in VS Code.
 ```
 sudo apt udpate
@@ -18,6 +19,7 @@ To start using docker's openroad image you can type :
 - Then create + run and new container name "my_openroad" along with our project mounted.
 ```
 sudo service docker start
+
 # First time only
 sudo docker run -dt --name my_openroad -v "${PWD}:/project" openroad/ubuntu20.04-dev
 ```
@@ -38,10 +40,13 @@ sudo docker exec -it my_openroad bash
 >- Type ```sudo service docker stop``` to stop the full docker service.
 
 ### Docker container in VS Code
-- Steps to use docker environment in VS Code :
-
-  Now, Open VS code and install the "dev container" extension
-- Go to terminal and start the container using above mentioned steps. (No need to use 'exec' command)
+Steps to use docker environment in VS Code. Now, Open VS code and install the "dev container" extension. Then do the following :
+- Go to terminal and start the container using above/below mentioned steps.
+  ```
+  sudo docker ps -as
+  sudo docker start my_openroad
+  # No need to use 'docker exec' command
+  ```
 - Click on ```><``` on the bottom left or Open Command Pallet using ```>``` in search bar.
 - Then search for ```Dev Container : Attach running container``` (This will only work if you have started the container, else error)
 - Attach the __my_openroad__ container (you should see project directory, which contains the Local mounted directory)
@@ -50,6 +55,8 @@ sudo docker exec -it my_openroad bash
 - Now , go to search bar and type ```/``` to move through directories.
 - Here,go to project directory now : /project. So ```cd/ prediuous```
 
+  ***
+  
 ### The github for OpenRoad
 ```
 https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#build-with-prebuilt-binaries
@@ -61,20 +68,29 @@ https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#
   git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
   cd OpenROAD
   ```
-Probable error: 
+- Probable error:
   ```
   git config --global --add safe.directory /project/OpenROAD/third-party/abc
   fatal: Failed to recurse into submodule path 'src/sta'
   fatal: Failed to recurse into submodule path 'third-party/abc'
   ```
-Reason: This "Dubious Ownership" error is a common security feature in newer versions of Git. Since you are working as root inside a Docker container, but the files are being written to a "mounted" directory (your Windows/WSL drive), Git gets suspicious because the file owner on the "outside" doesn't match the user on the "inside."
-Solution 
-```
-git config --global --add safe.directory "*"
-cd /project/OpenROAD
-git submodule update --init --recursive
-```
-  
-### Manual isntallation using .deb file
-  Go to (https://openroad-flow-scripts.readthedocs.io/en/latest/user/BuildWithPrebuilt.html)
-  Follow the steps mentioned there
+  Reason: This "Dubious Ownership" error is a common security feature in newer versions of Git. Since you are working as root inside a Docker container, but the files are being written to a "mounted" directory (your Windows/WSL drive), Git gets suspicious because the file owner on the "outside" doesn't match the user on the "inside."
+  Solution 
+  ```
+  git config --global --add safe.directory "*"
+  cd /project/OpenROAD
+  git submodule update --init --recursive
+  ```
+### Download the binary file from this website : 
+- Go to Official [Precision website](https://openroad-flow-scripts.readthedocs.io/en/latest/user/BuildWithPrebuilt.html) 
+- Keep the downloaded binary file into you current project working directory.
+- Install it (via docker environment) :
+- ```
+  apt update
+  apt install -y /project/openroad_26Q1-951-g6975124cf2_amd64-ubuntu-22.04.deb
+
+  # Verify it works
+  openroad -version
+  ```
+
+
