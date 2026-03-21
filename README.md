@@ -36,7 +36,7 @@ sudo docker exec -it my_openroad bash
 >- Type ```sudo service docker status``` to check the status of docker (running or stopped).
 >- Type ```sudo docker stop my_openroad ``` to stop the running container.
 >- Type ```sudo service docker stop``` to stop the full docker service.
-```
+
 ### Docker container in VS Code
 - Steps to use docker environment in VS Code :
 
