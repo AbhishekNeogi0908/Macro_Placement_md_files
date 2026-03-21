@@ -57,9 +57,24 @@ https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#
 ### Git Clone Openroad :
 - From the docker or simple wsl, do git clone
   ```
+  git config --global --add safe.directory "*"
   git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
   cd OpenROAD
   ```
+Probable error: 
+  ```
+  git config --global --add safe.directory /project/OpenROAD/third-party/abc
+  fatal: Failed to recurse into submodule path 'src/sta'
+  fatal: Failed to recurse into submodule path 'third-party/abc'
+  ```
+Reason: This "Dubious Ownership" error is a common security feature in newer versions of Git. Since you are working as root inside a Docker container, but the files are being written to a "mounted" directory (your Windows/WSL drive), Git gets suspicious because the file owner on the "outside" doesn't match the user on the "inside."
+Solution 
+```
+git config --global --add safe.directory "*"
+cd /project/OpenROAD
+git submodule update --init --recursive
+```
+  
 ### Manual isntallation using .deb file
   Go to (https://openroad-flow-scripts.readthedocs.io/en/latest/user/BuildWithPrebuilt.html)
   Follow the steps mentioned there
