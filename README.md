@@ -85,7 +85,7 @@ https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#
 - Go to Official [Precision website](https://openroad-flow-scripts.readthedocs.io/en/latest/user/BuildWithPrebuilt.html) 
 - Keep the downloaded binary file into you current project working directory.
 - Install it (via docker environment) :
-- ```
+  ```
   apt update
   apt install -y /project/openroad_26Q1-951-g6975124cf2_amd64-ubuntu-22.04.deb
 
@@ -93,4 +93,66 @@ https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#
   openroad -version
   ```
 
+OpenRoad successfully Installed !!!
+
+***
+## Installing RosettaStone
+Since you are already inside your Docker container and positioned in the ```/project``` directory, you can download RosettaStone using git.
+```
+# 1. Ensure you are in your mounted project folder
+cd /project
+
+# 2. Clone the repository
+git clone https://github.com/ABKGroup/RosettaStone.git
+
+# 3. Enter the directory to prepare for conversion
+cd RosettaStone
+```
+### RosettaStone env variable path setup - 
+Install 'nano' editor (if not installed) :
+  ```
+  apt install nano
+  ```
+  Then open .bashrc file :
+  ```
+  nano ~/.bashrc
+  ```
+Then add this line at the end of bash file :
+  ```
+  export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.10/dist-packages
+  ```
+
+### Create Symbolic link 
+Since we are working in a Docker container with limited virtual disk space, we don't want to have three copies of the adaptec1 benchmark (one in your root, one in RosettaStone, one in your Optimizer folder).
+```
+# ln -s [TARGET_FOLDER] [LINK_NAME]
+ln -s /project/adaptec1 ./adaptec1
+```
+To verify symbolic link :  
+```
+ls -l
+```
+Expected output : something like :```lrwxrwxrwx 1 1000 1000    17 Mar 21 03:41 adaptec1 -> /project/adaptec1```
+
+### Modify the convert_bookshelf2odb.py 
+To convert bookshelf to odb we have to use 'convert_bookshelf2odb.py'.Open and scroll down to the very bottom of the file. RosettaStone uses a "Settings" block to determine which folders to process and what technology to map them to.
+
+Open the file in your VS Code editor and modify the last few lines to look exactly like this:
+```
+################ Settings #################
+# This is where your converted .odb file will be saved
+odbPath = '../../odbFiles' 
+
+# We will use '0' padding to keep the macro sizes exactly as they are in your .nodes file
+cellPaddings = [0] 
+
+# The ISPD 2005 benchmarks (like adaptec1) follow this format
+modeFormats = ['ISPD05'] 
+
+# IMPORTANT: This must match the name of your symlink/folder
+odbList = [
+    'adaptec1', 
+]
+###########################################
+```
 
