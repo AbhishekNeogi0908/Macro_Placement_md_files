@@ -19,10 +19,10 @@ To start using docker's openroad image you can type :
 ```
 sudo service docker start
 # First time only
-sudo docker run -dt --name my_openroad -v $(pwd):/project openroad/ubuntu20.04-dev
+sudo docker run -dt --name my_openroad -v "${PWD}:/project" openroad/ubuntu20.04-dev
 ```
 Open a pre-made container (example container name 'my_openroad') : 
-```
+
 # 1. Start the existing container
 sudo docker ps -as
 sudo docker start my_openroad
@@ -46,7 +46,20 @@ sudo docker exec -it my_openroad bash
 - Then search for ```Dev Container : Attach running container``` (This will only work if you have started the container, else error)
 - Attach the __my_openroad__ container (you should see project directory, which contains the Local mounted directory)
 <img width="533" height="51" alt="image" src="https://github.com/user-attachments/assets/95f1b2d9-bf66-41b3-99e4-0eccc4c80510" />
+
 - Now , go to search bar and type ```/``` to move through directories.
-- Hence,Go to project directory now : /project. So ```cd/ prediuous```
+- Here,go to project directory now : /project. So ```cd/ prediuous```
+
+### The github for OpenRoad
+```
+https://github.com/The-OpenROAD-Project/OpenROAD/blob/master/docs/user/Build.md#build-with-prebuilt-binaries
+```
 ### Git Clone Openroad :
-- From the docker or simple wsl, do git clone 
+- From the docker or simple wsl, do git clone
+  ```
+  git clone --recursive https://github.com/The-OpenROAD-Project/OpenROAD.git
+  cd OpenROAD
+  ```
+### Manual isntallation using .deb file
+  Go to (https://openroad-flow-scripts.readthedocs.io/en/latest/user/BuildWithPrebuilt.html)
+  Follow the steps mentioned there
