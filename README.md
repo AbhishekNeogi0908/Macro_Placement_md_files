@@ -203,7 +203,11 @@ mkdir -p /project/tech
 # 2. Download the official Nangate45 LEF from the OpenROAD repository
 wget -O /project/tech/Nangate45.lef https://raw.githubusercontent.com/The-OpenROAD-Project/OpenROAD/master/test/Nangate45/Nangate45.lef
 ```
-Also the path in driver file have been updated and hardcoded here : ```tech_lef = '/project/tech/Nangate45.lef'```
+Also the path in driver file have been updated and hardcoded here : 
+```
+tech_lef = '/project/tech/Nangate45.lef'
+```
+
 Error 3: Overwrite Database Units problem in RosettaStone : 
 
 ```
@@ -222,9 +226,9 @@ It reads the current Database Units (DBU) from the Nangate45 LEF: originalLEFDbu
 It immediately tries to overwrite the DBU with that exact same number: ```odbTech.setDbUnitsPerMicron(originalLEFDbu)```
 In older versions of OpenROAD, this redundant action was harmless. In OpenROAD 26Q1, the developers wisely made the Technology DBU "read-only" once a LEF is loaded. You can't change the fundamental rules of the universe after it's created. 
 
-- So **comment** out this at line980 or nearby. 
+- So **comment** out this at line 980 or nearby like : 
 ```
-odbTech.setDbUnitsPerMicron(originalLEFDbu)
+# odbTech.setDbUnitsPerMicron(originalLEFDbu)
 ````
 Try to run again (Mentioned earlier)
 
