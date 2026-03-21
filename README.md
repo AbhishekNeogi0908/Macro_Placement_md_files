@@ -232,3 +232,30 @@ In older versions of OpenROAD, this redundant action was harmless. In OpenROAD 2
 ````
 Try to run again (Mentioned earlier)
 
+Error 4:
+```
+[WARNING] SDFF_X2 has I/O = 4/2, so skipped
+Use all masters available in OpenDB: 107 masters
+ERROR: Cannot find sequential cells in OpenDB
+Traceback (most recent call last):
+  File "/project/RosettaStone/benchGen/run_BookshelfToOdb.py", line 35, in <module>
+```
+Solution :
+- Go to BookshelfToOdb.py
+- Search near line 511 or 514 :
+  ```
+  ffArr = [0 for m in self.masters if m.isSequential()]
+
+    # if len(ffArr) == 0:
+    #   ErrorQuit("Cannot find sequential cells in OpenDB")
+  ```
+Comment out this above line of code and introduce a dummy ffArr list.
+```
+# ffArr = [0 for m in self.masters if m.isSequential()]
+
+    # if len(ffArr) == 0:
+    #   ErrorQuit("Cannot find sequential cells in OpenDB")
+    ffArr = [1]
+```
+
+Try to run again. There will be some progress.
