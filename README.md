@@ -146,7 +146,7 @@ There is a driver file name ```run_baseline.py``` which runs the ```BookshelfToO
 >   ModuleNotFoundError: No module named 'odbpy'
 >```
 
-###To Run :
+### To Run :
 ```
  openroad -python /project/RosettaStone/benchGen/run_BookshelfToOdb.py
 ```
@@ -165,8 +165,7 @@ Already added chdir() code in driver program
 # 2. Teleport the script's execution into your benchmark folder
 os.chdir('/project/adaptec1')
 ```
-Error 2: Lef file error 
-Means your Bookshelf files were successfully located and parsed. Your benchmark is officially loaded into memory. The crash you hit next (TypeError: ... dbChip_create) is a classic OpenROAD API version mismatch.In older versions of OpenROAD, you could create a blank "Chip" without defining the physical technology rules first. In OpenROAD 26Q1, the dbChip_create command now strictly requires two arguments: the database and a Technology object (dbTech).
+#### Error 2: Lef file error 
 
 ```
 Bookshelf Parsing Done
@@ -180,6 +179,8 @@ Traceback (most recent call last):
   File "odb_py.py", line 6345, in dbChip_create
 TypeError: Wrong number or type of arguments for overloaded function 'dbChip_create'.
 ```
+Means your Bookshelf files were successfully located and parsed. Your benchmark is officially loaded into memory. The crash you hit next (TypeError: ... dbChip_create) is a classic OpenROAD API version mismatch.In older versions of OpenROAD, you could create a blank "Chip" without defining the physical technology rules first. In OpenROAD 26Q1, the dbChip_create command now strictly requires two arguments: the database and a Technology object (dbTech).
+
 #### Solution : 
 #### 1st argument correction
 **Direct replacing :** 
@@ -208,7 +209,7 @@ Also the path in driver file have been updated and hardcoded here :
 tech_lef = '/project/tech/Nangate45.lef'
 ```
 
-Error 3: Overwrite Database Units problem in RosettaStone : 
+#### Error 3: Overwrite Database Units problem in RosettaStone : 
 
 ```
 Bookshelf Parsing Done
@@ -232,7 +233,7 @@ In older versions of OpenROAD, this redundant action was harmless. In OpenROAD 2
 ````
 Try to run again (Mentioned earlier)
 
-Error 4:
+#### Error 4:
 ```
 [WARNING] SDFF_X2 has I/O = 4/2, so skipped
 Use all masters available in OpenDB: 107 masters
@@ -240,7 +241,7 @@ ERROR: Cannot find sequential cells in OpenDB
 Traceback (most recent call last):
   File "/project/RosettaStone/benchGen/run_BookshelfToOdb.py", line 35, in <module>
 ```
-Solution :
+#### Solution :
 - Go to BookshelfToOdb.py
 - Search near line 511 or 514 :
   ```
@@ -260,7 +261,7 @@ Comment out this above line of code and introduce a dummy ffArr list.
 
 Try to run again. There will be some progress.
 
-Error 5 : 
+#### Error 5 : 
 ```
     self.odbLib = self.odbpy.dbLib_create(self.odb, "fakeMacros")
   File "odb_py.py", line 4340, in dbLib_create
@@ -270,7 +271,8 @@ TypeError: Wrong number or type of arguments for overloaded function 'dbLib_crea
     odb::dbLib::create(odb::dbDatabase *,char const *,odb::dbTech *)
 ```
 
-Solution : Due to new version, it is another API mismatch. Just like the "Chip" creation error we fixed earlier, the OpenROAD 26Q1 version of dbLib_create now strictly requires you to pass the Technology object (dbTech) when creating a new library.
+#### Solution : 
+Due to new version, it is another API mismatch. Just like the "Chip" creation error we fixed earlier, the OpenROAD 26Q1 version of dbLib_create now strictly requires you to pass the Technology object (dbTech) when creating a new library.
 
 **Manual Update :** 
 1. Open /project/RosettaStone/benchGen/BookshelfToOdb.py.
@@ -279,14 +281,14 @@ Solution : Due to new version, it is another API mismatch. Just like the "Chip" 
 4. To: ```self.odbLib = self.odbpy.dbLib_create(self.odb, "fakeMacros", self.odb.getTech())```
 5. Save the file.
 
-**Error 6 :** 
+#### Error 6 : 
 ```
  File "/project/RosettaStone/benchGen/BookshelfToOdb.py", line 1445, in FillOdbNets
     self.odbpy.dbITerm_connect(dbITerm, dbNet)
 AttributeError: module 'odb' has no attribute 'dbITerm_connect'. Did you mean: 'dbCCSeg_connect'?
 ```
 This AttributeError is the final hurdle in the API migration. In OpenROAD 26Q1, the dbITerm_connect function was moved from a standalone module function to a direct method of the dbITerm object.
-
+#### Solution : 
 **Terminal command to edit :** 
 ```
 sed -i 's/self.odbpy.dbITerm_connect(dbITerm, dbNet)/dbITerm.connect(dbNet)/g' /project/RosettaStone/benchGen/BookshelfToOdb.py
