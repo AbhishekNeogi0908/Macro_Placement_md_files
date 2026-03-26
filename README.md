@@ -259,3 +259,43 @@ Comment out this above line of code and introduce a dummy ffArr list.
 ```
 
 Try to run again. There will be some progress.
+
+Error 5 : 
+```
+    self.odbLib = self.odbpy.dbLib_create(self.odb, "fakeMacros")
+  File "odb_py.py", line 4340, in dbLib_create
+TypeError: Wrong number or type of arguments for overloaded function 'dbLib_create'.
+  Possible C/C++ prototypes are:
+    odb::dbLib::create(odb::dbDatabase *,char const *,odb::dbTech *,char)
+    odb::dbLib::create(odb::dbDatabase *,char const *,odb::dbTech *)
+```
+
+Solution : Due to new version, it is another API mismatch. Just like the "Chip" creation error we fixed earlier, the OpenROAD 26Q1 version of dbLib_create now strictly requires you to pass the Technology object (dbTech) when creating a new library.
+
+**Manual Update :** 
+1. Open /project/RosettaStone/benchGen/BookshelfToOdb.py.
+2. Go to Line 1242.
+3. Change: ```self.odbLib = self.odbpy.dbLib_create(self.odb, "fakeMacros")```
+4. To: ```self.odbLib = self.odbpy.dbLib_create(self.odb, "fakeMacros", self.odb.getTech())```
+5. Save the file.
+
+**Error 6 :** 
+```
+ File "/project/RosettaStone/benchGen/BookshelfToOdb.py", line 1445, in FillOdbNets
+    self.odbpy.dbITerm_connect(dbITerm, dbNet)
+AttributeError: module 'odb' has no attribute 'dbITerm_connect'. Did you mean: 'dbCCSeg_connect'?
+```
+This AttributeError is the final hurdle in the API migration. In OpenROAD 26Q1, the dbITerm_connect function was moved from a standalone module function to a direct method of the dbITerm object.
+
+**Terminal command to edit :** 
+```
+sed -i 's/self.odbpy.dbITerm_connect(dbITerm, dbNet)/dbITerm.connect(dbNet)/g' /project/RosettaStone/benchGen/BookshelfToOdb.py
+```
+
+**Manual Edit (Recommended):**
+
+1. Open ```/project/RosettaStone/benchGen/BookshelfToOdb.py.```
+2. Go to Line 1445.
+3. Change: ```self.odbpy.dbITerm_connect(dbITerm, dbNet)```
+4. To: ```dbITerm.connect(dbNet)```
+5. Save the file.
