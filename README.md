@@ -80,6 +80,20 @@ Then add this line at the end of bash file :
   export PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.10/dist-packages
   ```
 ***
+
+## 3. Installing Kahypar 
+If you are using Ubuntu 24, the you have to use the argument --break-system-packages, else it will give you virtua environment PEP 668 Error. Or Just create a virtual environment without argument.
+#### For ubuntu 24 -
+```
+pip install kahypar --break-system-packages
+```
+#### For ubuntu 22 -
+```
+pip install kahypar
+```
+
+**
+
 ## 3. Execution 
 The file ```BookshelfToOdb.py``` inside ```/project/RosettaStone/benchGen/``` will actually convert the Bookshelf format to Odb format.
 There is a driver file name ```run_baseline.py``` which runs the ```BookshelfToOdb.py``` file.
