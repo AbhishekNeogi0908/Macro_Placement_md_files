@@ -1,10 +1,184 @@
-OpenROAD 26Q1-951-g6975124cf2 
+OpenROAD 26Q2-1164-g08f67ee5ec 
 Features included (+) or not (-): +GPU +GUI +Python
 This program is licensed under the BSD-3 license. See the LICENSE file for details.
 Components of this program may be licensed under more restrictive licenses which must be honored.
-Error: run_BookshelfToOdb.py, 1 invalid command name "import"
-[?2004hopenroad> exit()
-[?2004linvalid command name "exit()"
-while evaluating exit()
-[?2004hopenroad> z[Kezit[K[K[Kxit
-[?2004l
+[WARNING ORD-0039] .openroad ignored with -python
+Enter mode (baseline / optimized): [INFO ODB-0227] LEF file: /home/abhishek-u-24-rs2/Macro_Placement/tech/Nangate45.lef, created 22 layers, 27 vias, 135 library cells
+Loading Technology LEF: /home/abhishek-u-24-rs2/Macro_Placement/tech/Nangate45.lef
+Auto-detected Site Name: FreePDK45_38x28_10R_NP_162NW_34O
+Parsing optimized_adaptec1.aux ...
+[WARNING] *.wts will be ignored
+Parsing adaptec1.nodes ...
+From Nodes: NumTotalNodes: 211447
+From Nodes: NumTerminals: 543
+Parsed Nodes: NumInsts: 210904
+Parsed Nodes: NumFixedInsts: 543
+Parsed Nodes: NumPrimary: 0
+
+Parsing final_full_placement.pl ...
+Parsed pl: NumInstsInPl: 211447
+Parsed pl: NumFixedInsts: 543
+Parsed pl: NumPrimary: 0
+
+Parsing adaptec1.nets ...
+From Nets: NumNets: 221142
+From Nets: NumPins: 944053
+Parsed Nets: NumNets: 221142
+
+Parsing adaptec1.scl ...
+From scl: NumRows: 890
+Parsed scl: NumRows: 890
+
+Bookshelf Parsing Done
+[INFO] ManuFacturingGrid: 10
+[WARNING] Fixed macro insts' pin layer is assigned as H: metal3 V: metal4
+[WARNING] Fixed macro insts' pin layer is assigned as 
+active
+metal1
+via1
+metal2
+via2
+
+[WARNING] primary pin layer is assigned as metal4
+Start Bookshelf post processing ...
+SclRowHeight: 12
+NumMovableStdInsts: 210904
+NumMovableMacroInsts: 0
+NumFixedInsts: 543
+NumPrimary: 0
+Post processing of Bookshelf is done
+[WARNING] ANTENNA_X1 has I/O = 1/0, so skipped
+[WARNING] DFFRS_X1 has I/O = 4/2, so skipped
+[WARNING] DFFRS_X2 has I/O = 4/2, so skipped
+[WARNING] DFFR_X1 has I/O = 3/2, so skipped
+[WARNING] DFFR_X2 has I/O = 3/2, so skipped
+[WARNING] DFFS_X1 has I/O = 3/2, so skipped
+[WARNING] DFFS_X2 has I/O = 3/2, so skipped
+[WARNING] DFF_X1 has I/O = 2/2, so skipped
+[WARNING] DFF_X2 has I/O = 2/2, so skipped
+[WARNING] FA_X1 has I/O = 3/2, so skipped
+[WARNING] TAPCELL_X1 has I/O = 0/0, so skipped
+[WARNING] FILLCELL_X1 has I/O = 0/0, so skipped
+[WARNING] FILLCELL_X16 has I/O = 0/0, so skipped
+[WARNING] FILLCELL_X2 has I/O = 0/0, so skipped
+[WARNING] FILLCELL_X32 has I/O = 0/0, so skipped
+[WARNING] FILLCELL_X4 has I/O = 0/0, so skipped
+[WARNING] FILLCELL_X8 has I/O = 0/0, so skipped
+[WARNING] HA_X1 has I/O = 2/2, so skipped
+[WARNING] LOGIC0_X1 has I/O = 0/1, so skipped
+[WARNING] LOGIC1_X1 has I/O = 0/1, so skipped
+[WARNING] SDFFRS_X1 has I/O = 6/2, so skipped
+[WARNING] SDFFRS_X2 has I/O = 6/2, so skipped
+[WARNING] SDFFR_X1 has I/O = 5/2, so skipped
+[WARNING] SDFFR_X2 has I/O = 5/2, so skipped
+[WARNING] SDFFS_X1 has I/O = 5/2, so skipped
+[WARNING] SDFFS_X2 has I/O = 5/2, so skipped
+[WARNING] SDFF_X1 has I/O = 4/2, so skipped
+[WARNING] SDFF_X2 has I/O = 4/2, so skipped
+Use all masters available in OpenDB: 107 masters
+NumSequentialCells: 1
+GivenSite: FreePDK45_38x28_10R_NP_162NW_34O
+siteWidth: 380, siteHeight: 2800
+BookshelfDbuRatio: 233.33
+
+Available inst master info from OpenDB
+numInputs: 2 minWidth: 4 maxWidth: 42 masterCnt 30
+numInputs: 3 minWidth: 6 maxWidth: 47 masterCnt 25
+numInputs: 4 minWidth: 8 maxWidth: 29 masterCnt 24
+numInputs: 5 minWidth: 9 maxWidth: 21 masterCnt 6
+numInputs: 6 minWidth: 11 maxWidth: 22 masterCnt 7
+numInputs: 1 minWidth: 3 maxWidth: 79 masterCnt 15
+
+Available ff master info from OpenDB
+
+minFFCellWidth: 9
+
+NumSkippedInsts: 55454 (26.29 percent)
+NumAssignedFFs: 0 (0.00 percent)
+NonFF Cell info from Bookshelf. Key = 10000 * numInputs + width)
+key 10005 numInst: 14018
+key 10006 numInst: 8
+key 10007 numInst: 6454
+key 10008 numInst: 834
+key 20004 numInst: 1
+key 20007 numInst: 9
+key 20008 numInst: 30545
+key 20009 numInst: 46
+key 20011 numInst: 230
+key 20012 numInst: 7925
+key 20013 numInst: 4021
+key 20015 numInst: 66
+key 20016 numInst: 869
+key 20018 numInst: 28
+key 30005 numInst: 1
+key 30009 numInst: 5764
+key 30010 numInst: 3350
+key 30011 numInst: 9044
+key 30012 numInst: 108
+key 30013 numInst: 2711
+key 30015 numInst: 891
+key 30016 numInst: 402
+key 30017 numInst: 1172
+key 30019 numInst: 2204
+key 30021 numInst: 34
+key 40008 numInst: 1
+key 40012 numInst: 3
+key 40014 numInst: 7836
+key 40015 numInst: 5962
+key 40016 numInst: 4710
+key 40017 numInst: 2263
+key 40018 numInst: 159
+key 40020 numInst: 10037
+key 50020 numInst: 164
+key 50024 numInst: 22712
+key 50027 numInst: 723
+key 50051 numInst: 22
+key 60013 numInst: 8790
+key 60014 numInst: 240
+key 60015 numInst: 22
+key 60016 numInst: 1004
+key 60017 numInst: 68
+FF Cell info from Bookshelf. Key = 10000 * numInputs + width)
+BookshelfCore: 459 459 11151 11128
+DEFCore: 107100 107100 2601900 2596530
+Total 890 Rows are created in OpenDB
+Vertical(X) Layer: metal4
+c2d 107100 pitch 560
+offset 190
+Macro Place Offset - x: 190, y: 140 
+DEFDie: 0 0 2709190 2706340
+
+Total 542 macros are created in OpenDB
+10000 nets are created in OpenDB
+20000 nets are created in OpenDB
+30000 nets are created in OpenDB
+40000 nets are created in OpenDB
+50000 nets are created in OpenDB
+60000 nets are created in OpenDB
+70000 nets are created in OpenDB
+80000 nets are created in OpenDB
+90000 nets are created in OpenDB
+100000 nets are created in OpenDB
+110000 nets are created in OpenDB
+120000 nets are created in OpenDB
+130000 nets are created in OpenDB
+140000 nets are created in OpenDB
+150000 nets are created in OpenDB
+160000 nets are created in OpenDB
+170000 nets are created in OpenDB
+180000 nets are created in OpenDB
+190000 nets are created in OpenDB
+200000 nets are created in OpenDB
+210000 nets are created in OpenDB
+220000 nets are created in OpenDB
+Total 221142 nets are created in OpenDB
+DEBUG: Found 2 libraries in database.
+DEBUG: Found library: Nangate45.lef
+DEBUG: Found library: fakeMacros
+Generated LEF: odbFiles/Nangate45.lef
+Generated LEF: odbFiles/fakeMacros
+
+SUCCESS!
+ODB: odbFiles/adaptec1_optimized.odb
+DEF: odbFiles/adaptec1_optimized.def
+>>> 
