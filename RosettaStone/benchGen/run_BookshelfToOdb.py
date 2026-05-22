@@ -1,9 +1,16 @@
-import odb
+
 import sys
 import os
+from pathlib import Path
+
+# Step 1: Dynamically locate the 'Macro_Placement' directory path
+# This looks at the absolute path of this file and climbs up to find 'Macro_Placement'
+current_path = Path(os.path.abspath(__file__))
+macro_placement_dir = next(p for p in current_path.parents if p.name == "Macro_Placement")
 
 # 1. Setup paths
-sys.path.append('RosettaStone/benchGen')
+sys.path.append(macro_placement_dir / 'RosettaStone' / 'benchGen')
+import odb
 import BookshelfToOdb as b2o
 
 # 2. Ask user for mode
@@ -26,7 +33,8 @@ os.chdir('adaptec1')
 db = odb.dbDatabase.create()
 
 # 5. Read technology LEF
-tech_lef = '/mnt/c/Users/abhis/OneDrive/Desktop/Macro_Placement_WSL/tech/Nangate45.lef'
+# tech_lef = '/mnt/c/Users/abhis/OneDrive/Desktop/Macro_Placement_WSL/tech/Nangate45.lef'
+tech_lef = os.path.join(macro_placement_dir, 'tech', 'Nangate45.lef')
 print(f"Loading Technology LEF: {tech_lef}")
 odb.read_lef(db, tech_lef)
 
