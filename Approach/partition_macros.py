@@ -3,45 +3,33 @@ import os
 import sys
 import kahypar
 import urllib.request
+from collections import Counter
 
 # ==========================================
 # Path Configuration
 # ==========================================
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "adaptec1"))
-
-# 1. Define the main Results directory
 RESULTS_DIR = os.path.join(DATA_DIR, "Results")
-
-# 2. Define the NEW specific subfolder for this approach
-#PHASE1_DIR = os.path.join(RESULTS_DIR, "Phase1_Partitioning")
 PHASE1_DIR = RESULTS_DIR
 
-# 3. Create the directories safely
 os.makedirs(PHASE1_DIR, exist_ok=True)
 
 NODES_FILE = os.path.join(DATA_DIR, "adaptec1.nodes")
 PL_FILE    = os.path.join(DATA_DIR, "adaptec1.pl")
 NETS_FILE  = os.path.join(DATA_DIR, "adaptec1.nets")
-
-# 4. Route the output JSON to the new folder
 JSON_OUT   = os.path.join(PHASE1_DIR, "clustered_macros.json")
 
 def verify_files_exist():
-    """Safety check to ensure all input files are found before running."""
     missing = [f for f in [NODES_FILE, PL_FILE, NETS_FILE] if not os.path.exists(f)]
     if missing:
         print("❌ ERROR: Could not find the following files:")
-        for m in missing:
-            print(f"   - {m}")
+        for m in missing: print(f"   - {m}")
         sys.exit(1)
     print("✅ All Bookshelf files found successfully!")
 
 def get_kahypar_config():
-    """Ensures the KaHyPar configuration file exists, saving it to the new subfolder."""
-    # Route the .ini file to the new Phase1 folder
     ini_path = os.path.join(PHASE1_DIR, "cut_kKaHyPar_sea20.ini")
-    
     if not os.path.exists(ini_path):
         print("📥 Downloading official KaHyPar configuration file...")
         url = "https://raw.githubusercontent.com/kahypar/kahypar/master/config/cut_kKaHyPar_sea20.ini"
@@ -52,63 +40,58 @@ def get_kahypar_config():
             print("✅ Configuration downloaded successfully.")
         except Exception as e:
             print(f"❌ Failed to download configuration: {e}")
-            print(f"\n⚠️ WORKAROUND: Please download this file manually:")
-            print(url)
-            print(f"And save it exactly here: {ini_path}")
             sys.exit(1)
-            
     return ini_path
 
 def parse_bookshelf(nodes_file, pl_file, nets_file, max_fanout=500):
-    """Dynamically extracts and UN-FIXES macros from the ISPD 2005 benchmark."""
+    """Dynamically extracts and purifies macros based on dynamic row profiling."""
     macros = {}
     macro_names = []
     hyperedges = []
     
-    print("Analyzing .nodes to prove standard cell height...")
-    height_counts = {}
     all_raw_nodes = {}
+    all_heights = []
     
     # ---------------------------------------------------------
-    # PASS 1: Statistical Analysis of Node Heights
+    # PASS 1: Read database and dynamically find cell row height
     # ---------------------------------------------------------
     with open(nodes_file, 'r') as f:
         for line in f:
             parts = line.strip().split()
             if len(parts) >= 3 and not line.startswith(('UCLA', 'Num', '#')):
                 name, w, h = parts[0], int(parts[1]), int(parts[2])
-                # Check if the dataset claims this block is locked
                 is_fixed = (len(parts) > 3 and parts[3] == 'terminal')
                 
                 all_raw_nodes[name] = {"w": w, "h": h, "fixed": is_fixed, "x": 0, "y": 0}
-                
-                # We only count standard cells (not terminals) to find the standard row height
                 if not is_fixed:
-                    height_counts[h] = height_counts.get(h, 0) + 1
+                    all_heights.append(h)
 
-    # The most frequent movable height is mathematically the Standard Cell Height
-    std_cell_height = max(height_counts, key=height_counts.get)
-    macro_threshold = std_cell_height * 4
+    std_cell_height = Counter(all_heights).most_common(1)[0][0] if all_heights else 12
+    print(f"ℹ️  Dynamically Identified Standard Cell Row Height: {std_cell_height} units")
+
+    # ---------------------------------------------------------
+    # PASS 2: Explicit Purification Filtering Matrix
+    # ---------------------------------------------------------
+    dropped_cells = 0
     
-    print(f"✅ Discovered Standard Cell Height: {std_cell_height}")
-    print(f"✅ Dynamic Macro Threshold set at : Height or Width > {macro_threshold}")
-
-    # ---------------------------------------------------------
-    # PASS 2: Segregation AND "Un-Fixing" for Gurobi
-    # ---------------------------------------------------------
     for name, data in all_raw_nodes.items():
         w, h, originally_fixed = data['w'], data['h'], data['fixed']
+        area = w * h
         
-        # THE FIX: If it is physically massive, it is a Macro. 
-        # We MUST strip the 'terminal' tag and un-fix it so Gurobi can move it!
-        if h > macro_threshold or w > macro_threshold:
-            macros[name] = {"w": w, "h": h, "fixed": False, "x": 0, "y": 0}
-            macro_names.append(name)
+        # THE EXACT AUDIT LOGIC GATING MECHANISM:
+        # If an item's area is 4-digits or less, OR its height matches the uniform row height,
+        # it is classified as a standard cell. Drop/remove it completely!
+        if area <= 9999 or h == std_cell_height:
+            dropped_cells += 1
+            continue
             
-        # If it is small and fixed, it is an actual I/O Pad. Keep it fixed.
-        elif originally_fixed:
-            macros[name] = {"w": w, "h": h, "fixed": True, "x": 0, "y": 0}
-            macro_names.append(name)
+        # If it survives the gate, it is a True Macro.
+        # Un-fix if it was a movable macro, otherwise retain its fixed anchor status.
+        is_hard_fixed = originally_fixed
+        macros[name] = {"w": w, "h": h, "fixed": is_hard_fixed, "x": 0, "y": 0}
+        macro_names.append(name)
+
+    print(f"🔒 Safely identified and dropped {dropped_cells} standard cells before partitioning.")
 
     print("Parsing .pl...")
     with open(pl_file, 'r') as f:
@@ -138,7 +121,6 @@ def parse_bookshelf(nodes_file, pl_file, nets_file, max_fanout=500):
                         current_net.append(node_name)
                 
                 unique_net = list(set(current_net))
-                
                 if len(unique_net) >= 2:
                     hyperedges.append(unique_net)
             else:
@@ -148,7 +130,6 @@ def parse_bookshelf(nodes_file, pl_file, nets_file, max_fanout=500):
     return macros, macro_names, hyperedges
 
 def partition_with_kahypar(macros, macro_names, hyperedges, k=40, epsilon=0.03):
-    """Uses the KaHyPar Python library to partition the graph in memory."""
     print(f"\n🚀 Starting KaHyPar in-memory partitioning (Clusters = {k})...")
     
     name_to_id = {name: idx for idx, name in enumerate(macro_names)}
@@ -171,7 +152,6 @@ def partition_with_kahypar(macros, macro_names, hyperedges, k=40, epsilon=0.03):
     )
     
     context = kahypar.Context()
-    
     ini_path = get_kahypar_config()
     context.loadINIconfiguration(ini_path)
         
@@ -179,11 +159,10 @@ def partition_with_kahypar(macros, macro_names, hyperedges, k=40, epsilon=0.03):
     context.setEpsilon(epsilon)
     context.suppressOutput(True)
     
-    print("🧠 Partitioning engine running (this may take a few seconds)...")
+    print("🧠 Partitioning engine running...")
     kahypar.partition(hypergraph, context)
     
     clusters = {str(i): {} for i in range(k)}
-    
     for name in macro_names:
         node_id = name_to_id[name]
         block_id = hypergraph.blockID(node_id)
@@ -191,9 +170,6 @@ def partition_with_kahypar(macros, macro_names, hyperedges, k=40, epsilon=0.03):
         
     return clusters
 
-# ==========================================
-# Execution Flow
-# ==========================================
 if __name__ == "__main__":
     verify_files_exist()
 
@@ -203,7 +179,7 @@ if __name__ == "__main__":
     )
     
     print(f"\n📊 Extraction Summary:")
-    print(f"   - Found {len(MACROS)} Macros/Fixed Pads")
+    print(f"   - Found {len(MACROS)} Real Macros/Fixed Pads")
     print(f"   - Found {len(HYPEREDGES)} valid Macro-to-Macro nets")
 
     FINAL_CLUSTERS = partition_with_kahypar(MACROS, MACRO_NAMES, HYPEREDGES, k=40)
@@ -211,5 +187,5 @@ if __name__ == "__main__":
     with open(JSON_OUT, 'w') as f:
         json.dump(FINAL_CLUSTERS, f, indent=4)
         
-    print(f"\n✅ Successfully grouped macros into {len(FINAL_CLUSTERS)} clusters.")
+    print(f"\n✅ Successfully grouped macros into {len(FINAL_CLUSTERS)} clusters with zero standard cells.")
     print(f"Saved to: {JSON_OUT}\n")
